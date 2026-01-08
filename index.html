@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 关键：防盗链设置 -->
+    <meta name="referrer" content="no-referrer">
+    <title>探究铁元素的性质 - 实验报告</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 15px;
+        }
+
+        .menu-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .menu-item {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 12px;
+            padding: 18px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-color: var(--accent-color);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .menu-item .title {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .status-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .summary-text-list {
+            display: none;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed #eee;
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .menu-item.has-prop {
+            background-color: #f0fdf4;
+            border-color: var(--success-color);
+        }
+        .menu-item.has-prop .status-icon {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+        .menu-item.has-prop .status-icon::after {
+            content: '✓';
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .menu-item.has-prop .summary-text-list {
+            display: block;
+            color: #14532d;
+        }
+
+        .menu-item.no-prop {
+            background-color: #fef2f2;
+            border-color: var(--error-color);
+        }
+        .menu-item.no-prop .status-icon {
+            background-color: var(--error-color);
+            border-color: var(--error-color);
+            color: white;
+        }
+        .menu-item.no-prop .status-icon::after {
+            content: '✕';
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .menu-item.no-prop .summary-text-list {
+            display: block;
+            color: #7f1d1d;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        
+        .modal-content {
+            background: white; width: 90%; max-width: 700px;
+            border-radius: 16px; padding: 30px;
+            transform: scale(0.9); transition: transform 0.3s ease;
+            display: flex; flex-direction: column; max-height: 90vh;
+        }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .close-btn { background: none; border: none; font-size: 28px; cursor: pointer; color: #999; }
+        
+        .video-wrapper {
+            width: 100%;
+            background-color: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+            position: relative;
+        }
+        
+        video {
+            width: 100%;
+            height: auto;
+            max-height: 50vh;
+            display: block;
+            pointer-events: none; /* 禁用点击暂停 */
+        }
+
+        .replay-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .replay-btn {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+
+        .replay-btn:hover { transform: scale(1.1); }
+        .replay-btn svg { width: 30px; height: 30px; fill: var(--primary-color); }
+
+        .modal-desc {
+            flex-grow: 1; 
+            overflow-y: auto; 
+            margin-bottom: 20px; 
+            color: #444; 
+            font-size: 1.05rem;
+            line-height: 1.6;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .action-btn {
+            background-color: var(--accent-color); color: white; border: none;
+            padding: 12px 24px; border-radius: 8px; font-size: 1rem;
+            cursor: pointer; align-self: flex-end;
+        }
+        .action-btn:hover { background-color: #2980b9; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>探究铁元素的性质</h1>
+    <ul class="menu-list" id="menuList">
+        <!-- 列表由 JS 动态生成 -->
+    </ul>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">标题</h2>
+            <button class="close-btn" onclick="closeModal(false)">&times;</button>
+        </div>
+        
+        <div class="video-wrapper" id="videoContainer">
+            <!-- 视频内容 -->
+        </div>
+        
+        <div class="modal-desc" id="modalDesc">
+            <!-- 描述文字 -->
+        </div>
+
+        <button class="action-btn" onclick="closeModal(true)">确认该性质</button>
+    </div>
+</div>
+
+<script>
+    // 视频链接变量
+    const video_metallic = "https://v6-artist.vlabvod.com/9d288fba0e9fa97721e3d1f4d84a12e1/6968dc5b/video/tos/cn/tos-cn-v-148450/oohxo0xJGI6cofYOkgLgEMDLfCeISPBQIMAzOv/?a=4066&ch=0&cr=0&dr=0&er=0&cd=0%7C0%7C0%7C0&br=6350&bt=6350&cs=0&ds=12&ft=5QYTUxhhe6BMyqWtbQVJD12Nzj&mime_type=video_mp4&qs=0&rc=OGU6NmQzaWlkOzY8NjNmN0BpM2lrOnA5cmt0ODczNDM7M0A0MDBiXi9eXjMxMDUyNWItYSNuZDQuMmRjMGNhLS1kNC9zcw%3D%3D&btag=c0000e00008000&dy_q=1767875025&feature_id=7bed9f9dfbb915a044e5d473759ce9df&l=20260108202345DF0920DF948E33E3D4A6";
+    
+    const video_oxidizing = "https://v3-artist.vlabvod.com/3eaafdd6251874395c038708a18450dd/6968e729/video/tos/cn/tos-cn-v-148450/oEKfaZhrierhIex4AXeflEQ8ANvJtQ4nICuYJg/?a=4066&ch=0&cr=0&dr=0&er=0&cd=0%7C0%7C0%7C0&br=6328&bt=6328&cs=0&ds=12&ft=5QYTUxhhe6BMyqHrbQVJD12Nzj&mime_type=video_mp4&qs=0&rc=ODU1ZTZoN2dkZDY6aTdlOUBpM251a3c5cjh0ODczNDM7M0AtLTU2Yi02NS4xYGAtMWBjYSMza2dnMmRjbWNhLS1kNC9zcw%3D%3D&btag=c0000e00008000&dy_q=1767877791&feature_id=7bed9f9dfbb915a044e5d473759ce9df&l=20260108210951F0E33FEBAD2CB3E5FFEE";
+
+    const properties = [
+        { 
+            title: "金属性 (活泼性)", 
+            videoUrl: video_metallic, 
+            hasProperty: true, 
+            summary: "铁属于中等活泼金属 (H以后，Zn以前)，能置换出酸中的氢，也能置换出铜溶液中的铜。" 
+        },
+        { 
+            title: "还原性", 
+            videoUrl: "", 
+            hasProperty: true, 
+            summary: "铁单质在化学反应中容易失去电子（变成+2或+3价），表现出较强的还原性。" 
+        },
+        { 
+            title: "氧化性", 
+            videoUrl: video_oxidizing, 
+            hasProperty: false, 
+            summary: "铁单质处于最低价态（0价），通常只作还原剂，不具备氧化性（氧化性通常指Fe³⁺等离子）。" 
+        },
+        { 
+            title: "化学稳定性", 
+            videoUrl: "", 
+            hasProperty: false, 
+            summary: "铁的化学性质比较活泼，在潮湿空气中极易生锈（电化学腐蚀），不具备良好的化学稳定性。" 
+        },
+        { 
+            title: "变价特性", 
+            videoUrl: "", 
+            hasProperty: true, 
+            summary: "铁是典型的变价金属，常见化合价有 +2价 (亚铁) 和 +3价 (高铁)，不同价态颜色不同。" 
+        },
+        { 
+            title: "特异物理属性", 
+            videoUrl: "", 
+            hasProperty: true, 
+            summary: "铁具有铁磁性，能被磁铁吸引，这是铁区别于大多数其他金属的显著物理特征。" 
+        }
+    ];
+
+    const menuList = document.getElementById('menuList');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalTitle = document.getElementById('modalTitle');
+    const videoContainer = document.getElementById('videoContainer');
+    const modalDesc = document.getElementById('modalDesc');
+    let currentIndex = -1;
+
+    function initMenu() {
+        menuList.innerHTML = '';
+        properties.forEach((item, index) => {
+            const li = document.createElement('li');
+            li.className = 'menu-item';
+            li.onclick = () => openModal(index);
+            li.innerHTML = `
+                <div class="item-header">
+                    <span class="title">${item.title}</span>
+                    <div class="status-icon"></div>
+                </div>
+                <div class="summary-text-list" id="summary-${index}"></div>
+            `;
+            menuList.appendChild(li);
+        });
+    }
+
+    function openModal(index) {
+        currentIndex = index;
+        const data = properties[index];
+        modalTitle.innerText = data.title;
+        modalDesc.innerText = data.summary;
+        
+        if (data.videoUrl) {
+            videoContainer.innerHTML = `
+                <video id="currentVideo" autoplay playsinline style="width:100%; height:100%;">
+                    <source src="${data.videoUrl}" type="video/mp4">
+                </video>
+                <div class="replay-overlay" id="replayOverlay">
+                    <button class="replay-btn" onclick="replayVideo()">
+                        <svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+                    </button>
+                </div>
+            `;
+            
+            const video = document.getElementById('currentVideo');
+            const overlay = document.getElementById('replayOverlay');
+            
+            video.onended = function() {
+                overlay.style.display = 'flex';
+            };
+            
+        } else {
+            videoContainer.innerHTML = `<div style="color:white; text-align:center;">[ ${data.title} ] 视频待上传</div>`;
+        }
+        
+        modalOverlay.classList.add('active');
+    }
+
+    window.replayVideo = function() {
+        const video = document.getElementById('currentVideo');
+        const overlay = document.getElementById('replayOverlay');
+        if(video) {
+            video.currentTime = 0;
+            video.play();
+            overlay.style.display = 'none';
+        }
+    }
+
+    function closeModal(isCompleted) {
+        modalOverlay.classList.remove('active');
+        videoContainer.innerHTML = "";
+        if (isCompleted && currentIndex !== -1) {
+            updateItemStatus(currentIndex);
+        }
+        currentIndex = -1;
+    }
+
+    function updateItemStatus(index) {
+        const items = document.querySelectorAll('.menu-item');
+        const itemEl = items[index];
+        const data = properties[index];
+        const summaryEl = document.getElementById(`summary-${index}`);
+
+        itemEl.classList.remove('has-prop', 'no-prop');
+
+        if (data.hasProperty) {
+            itemEl.classList.add('has-prop');
+        } else {
+            itemEl.classList.add('no-prop');
+        }
+
+        summaryEl.innerText = data.summary;
+    }
+
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) closeModal(false);
+    });
+
+    initMenu();
+
+</script>
+
+</body>
+</html>
